@@ -1,19 +1,25 @@
-import React from 'react';
-import Form from './Components/Form';
-import logo from "./logo.svg";
+import React from "react";
+import Form from "./Components/Form";
+import Home from "./Components/Home";
 
 const App = () => {
-  return (
-    <div className="flex min-h-screen bg-gray-100 items-center overflow-auto">
-      <div className="m-4 p-8 mx-auto bg-white shadow-lg rounded-xl">
-        <div className="flex gap-2 items-center ">
-          <img className="h-16 w-16 animate-spin-slow" src={logo} alt="logo" />
-          <h1 className="text-center text-xl">Welcome to Lesson 5 $react-typescript with #tailwindcss </h1>
-        </div>
-        <Form />
-      </div>
-    </div>
-  );
-}
+	const [toggle, setToggle] = React.useState<boolean>(true);
+	const handleClick = () => {
+		setToggle(!toggle);
+	};
+	return (
+		<div className="flex min-h-screen bg-gray-100 items-center overflow-auto">
+			<div className="m-auto w-1/3 p-8 mx-auto bg-white shadow-lg rounded-xl">
+				{toggle ? <Home /> : <Form />}
+				<button
+					type="submit"
+					onClick={handleClick}
+					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
+					Open Form
+				</button>
+			</div>
+		</div>
+	);
+};
 
 export default App;
