@@ -1,24 +1,17 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Form from './Components/Form';
+import logo from "./logo.svg";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="flex min-h-screen bg-gray-100 items-center overflow-auto">
+      <div className="m-4 p-8 mx-auto bg-white shadow-lg rounded-xl">
+        <div className="flex gap-2 items-center ">
+          <img className="h-16 w-16 animate-spin-slow" src={logo} alt="logo" />
+          <h1 className="text-center text-xl">Welcome to Lesson 5 $react-typescript with #tailwindcss </h1>
+        </div>
+        <Form />
+      </div>
     </div>
   );
 }
