@@ -15,7 +15,7 @@ const App = () => {
 					type="submit"
 					onClick={handleClick}
 					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
-					Open Form
+					{toggle ? `Open` : `Close`} Form
 				</button>
 			</div>
 		</div>
