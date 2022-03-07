@@ -4,10 +4,24 @@ import { formFieldChecker } from "../interfaces/form";
 const Form = () => {
 	const formFields: formFieldChecker[] = [
 		{
-			id: "id_sample",
-			label: "Sample",
+			id: "id_first_name",
+			label: "First Name",
 			type: "text",
-			value: "This is a Sample field",
+		},
+		{
+			id: "id_last_name",
+			label: "Last Name",
+			type: "text",
+		},
+		{
+			id: "id_email",
+			label: "Email",
+			type: "email",
+		},
+		{
+			id: "id_date_of_birth",
+			label: "Date of Birth",
+			type: "date",
 		},
 	];
 	const formFieldTemplate: formFieldChecker = {
