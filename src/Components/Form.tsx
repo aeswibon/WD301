@@ -1,13 +1,6 @@
 import React from "react";
 import { formDataChecker } from "../interfaces/form";
 
-// const formFieldTemplate: formFieldChecker = {
-// 	id: new Date().getTime().toString(),
-// 	label: "",
-// 	type: "text",
-// 	value: "",
-// };
-
 // to get all the forms from localStorage
 const getLocalForms = (): formDataChecker[] => {
 	const localForms = localStorage.getItem("formData");
@@ -96,7 +89,7 @@ const Form = (props: {
 	React.useEffect(() => {
 		let timeout = setTimeout(() => {
 			handleSave(form);
-		}, 1000);
+		}, 100);
 		return () => clearTimeout(timeout);
 	}, [form]);
 
