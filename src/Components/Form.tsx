@@ -115,6 +115,22 @@ const Form = (props: {
 		});
 	};
 
+	const ClearForm = () => {
+		setForm((form) => {
+			const updatedFormFields = form.formFields.map((field) => {
+				return {
+					...field,
+					value: "",
+				};
+			});
+			return {
+				...form,
+				formFields: updatedFormFields,
+			};
+		});
+		setFieldInput("");
+	};
+
 	return (
 		<div>
 			<form className="flex flex-col">
@@ -170,7 +186,13 @@ const Form = (props: {
 					type="button"
 					onClick={() => props.setState("listForms")}
 					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
-					Submit
+					Close Form
+				</button>
+				<button
+					type="button"
+					onClick={ClearForm}
+					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
+					Clear form
 				</button>
 			</div>
 		</div>
