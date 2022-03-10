@@ -7,48 +7,70 @@ const Form = () => {
 			id: "id_first_name",
 			label: "First Name",
 			type: "text",
+			value: "",
 		},
 		{
 			id: "id_last_name",
 			label: "Last Name",
 			type: "text",
+			value: "",
 		},
 		{
 			id: "id_email",
 			label: "Email",
 			type: "email",
+			value: "",
 		},
 		{
 			id: "id_date_of_birth",
 			label: "Date of Birth",
 			type: "date",
+			value: "",
 		},
 	];
-	const formFieldTemplate: formFieldChecker = {
-		id: new Date().getTime().toString(),
-		label: "",
-		type: "text",
-		value: "",
-	};
 	const [fields, setFields] = React.useState<formFieldChecker[]>(formFields);
-	const [fieldInput, setFieldInput] =
-		React.useState<formFieldChecker>(formFieldTemplate);
+	const [fieldInput, setFieldInput] = React.useState<string>("");
 	const RemoveField = (field_id: string) => {
 		setFields(fields.filter((f) => f.id !== field_id));
 	};
 	const AddField = () => {
-		setFields([...fields, fieldInput]);
-		setFieldInput(formFieldTemplate);
+		setFields([
+			...fields,
+			{
+				id: new Date().getTime().toString(),
+				label: fieldInput,
+				type: "text",
+				value: "",
+			},
+		]);
+		setFieldInput("");
 	};
 	const ClearForm = () => {
-		setFields(formFields);
-		setFieldInput(formFieldTemplate);
+		const updatedField = fields.map((field) => {
+			return {
+				...field,
+				value: "",
+			};
+		});
+		setFields(updatedField);
+		console.log(fields);
+		setFieldInput("");
 	};
-	const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFieldInput({
-			...fieldInput,
-			label: e.target.value,
-			value: e.target.value,
+	const handleAddField = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFieldInput(e.target.value);
+	};
+	const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFields((fields) => {
+			const updatedFields = fields.map((field) => {
+				if (field.id === e.target.id) {
+					return {
+						...field,
+						value: e.target.value,
+					};
+				}
+				return field;
+			});
+			return updatedFields;
 		});
 	};
 
@@ -62,8 +84,10 @@ const Form = () => {
 							<div className="flex gap-4">
 								<input
 									id={field.id}
+									value={field.value}
 									className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800"
 									type={field.type}
+									onChange={handleInput}
 									placeholder={field.label}
 								/>
 								<button
@@ -77,17 +101,16 @@ const Form = () => {
 					);
 				})}
 				<div className="w-full">
-					<span className="text-lg font-semibold px-2">{fieldInput.label}</span>
+					{/* <span className="text-lg font-semibold px-2">{fieldInput}</span> */}
 					<div className="flex gap-4">
 						<input
-							value={fieldInput.value}
+							value={fieldInput}
 							className="border-2 border-gray-200 bg-gray-200 rounded-lg p-4 my-2 w-full outline-none hover:outline-blue-800"
-							type={fieldInput.type}
-							onChange={handleClick}
-							placeholder={fieldInput.label}
+							type="text"
+							onChange={handleAddField}
+							placeholder="Add new field"
 						/>
 						<button
-							key={fieldInput.id}
 							type="button"
 							onClick={AddField}
 							className="px-6 py-2 h-12 mt-4 bg-blue-600 rounded-lg text-white font-bold hover:text-blue-600 hover:bg-white hover:border-2 hover:border-blue-600">
