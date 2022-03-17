@@ -2,7 +2,7 @@
 
 ## Levels updates
 
-✅ ❓ Level 1 Done (Review Pending)
+✅ ✅ Level 2 Done (Accepted)
 
 ## Setting Up the Project
 
