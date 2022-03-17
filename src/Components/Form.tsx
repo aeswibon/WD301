@@ -1,54 +1,11 @@
+import { Link } from "raviger";
 import React from "react";
 import { formDataChecker } from "../interfaces/form";
+import { handleSave, initialState } from "../utils/form";
 
-// to get all the forms from localStorage
-const getLocalForms = (): formDataChecker[] => {
-	const localForms = localStorage.getItem("formData");
-	return localForms ? JSON.parse(localForms) : [];
-};
-
-// save the form in localStorage
-const saveLocalForms = (forms: formDataChecker[]) => {
-	localStorage.setItem("formData", JSON.stringify(forms));
-};
-
-// to initiate the state of the form
-const initialState = (id: string): formDataChecker => {
-	const formData = getLocalForms();
-	if (formData.length > 0) {
-		for (let i = 0; i < formData.length; i++) {
-			if (formData[i].id === id) {
-				return formData[i];
-			}
-		}
-	}
-	const newForm = {
-		id: id,
-		title: "",
-		formFields: [],
-	};
-	saveLocalForms([...formData, newForm]);
-	return newForm;
-};
-
-// save the form on each input
-const handleSave = (field: formDataChecker) => {
-	const formData = getLocalForms();
-	const updateFormData = formData.map((f) => {
-		if (f.id === field.id) {
-			return field;
-		}
-		return f;
-	});
-	saveLocalForms(updateFormData);
-};
-
-const Form = (props: {
-	state: string;
-	setState: React.Dispatch<React.SetStateAction<string>>;
-}): JSX.Element => {
+const Form = (props: { formId: string }): JSX.Element => {
 	const [form, setForm] = React.useState<formDataChecker>(
-		initialState(props.state),
+		initialState(props.formId),
 	);
 	const [fieldInput, setFieldInput] = React.useState<string>("");
 
@@ -103,6 +60,7 @@ const Form = (props: {
 				if (field.id === e.target.id) {
 					return {
 						...field,
+						label: e.target.value,
 						value: e.target.value,
 					};
 				}
@@ -163,7 +121,6 @@ const Form = (props: {
 					</div>
 				))}
 				<div className="w-full">
-					{/* <span className="text-lg font-semibold px-2">{fieldInput.label}</span> */}
 					<div className="flex gap-4">
 						<input
 							value={fieldInput}
@@ -182,12 +139,11 @@ const Form = (props: {
 				</div>
 			</form>
 			<div className="flex gap-4">
-				<button
-					type="button"
-					onClick={() => props.setState("listForms")}
+				<Link
+					href="/"
 					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
 					Close Form
-				</button>
+				</Link>
 				<button
 					type="button"
 					onClick={ClearForm}

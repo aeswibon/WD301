@@ -7013,6 +7013,11 @@ range-parser@^1.2.1, range-parser@~1.2.1:
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.1.tgz#3cf37023d199e1c24d1a55b84800c2f3e6468031"
   integrity sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==
 
+raviger@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/raviger/-/raviger-3.1.0.tgz#b4c55164eda4765c5c58d8f32b716c483ee398f2"
+  integrity sha512-Y37e7jPrMj1xgovrnwD4cTXWY4RQ7q1FDrEfmG0RQOBf8JZ54OlXHGCaslykaQud+WuuLN6hBzb6ENN/g8B1YA==
+
 raw-body@2.4.3:
   version "2.4.3"
   resolved "https://registry.yarnpkg.com/raw-body/-/raw-body-2.4.3.tgz#8f80305d11c2a0a545c2d9d89d7a0286fcead43c"
