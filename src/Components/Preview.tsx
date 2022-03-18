@@ -1,8 +1,8 @@
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import React from "react";
-import { formDataChecker } from "../interfaces/form";
+import { formDataChecker } from "../types/form";
 import { getLocalForms } from "../utils/form";
 
 const findForm = (formId: string): formDataChecker => {

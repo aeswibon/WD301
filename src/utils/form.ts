@@ -1,4 +1,4 @@
-import { formDataChecker } from "../interfaces/form";
+import { formDataChecker } from "../types/form";
 
 // to get all the forms from localStorage
 export const getLocalForms = (): formDataChecker[] => {

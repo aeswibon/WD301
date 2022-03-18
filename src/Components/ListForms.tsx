@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faEye, faTrashAlt } from "@fortawesome/free-regular-svg-icons";
-import { formDataChecker } from "../interfaces/form";
+import { formDataChecker } from "../types/form";
 import { Link, useQueryParams } from "raviger";
 
 const ListForms = (): JSX.Element => {
