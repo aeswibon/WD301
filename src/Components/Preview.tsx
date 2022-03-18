@@ -1,6 +1,6 @@
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import React from "react";
 import { formDataChecker } from "../interfaces/form";
 import { getLocalForms } from "../utils/form";
@@ -63,6 +63,7 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 						id={question?.id}
 						name={question?.label}
 						placeholder={question?.label}
+						type={question?.type}
 						value={answers[questionId]}
 						onChange={(e) => {
 							setAnswers({ ...answers, [questionId]: e.target.value });

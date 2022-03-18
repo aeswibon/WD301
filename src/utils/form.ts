@@ -1,4 +1,31 @@
-import { formDataChecker } from "../interfaces/form";
+import { formDataChecker, formFieldChecker } from "../interfaces/form";
+
+const initialFormFields: formFieldChecker[] = [
+	{
+		id: "id_first_name",
+		label: "First Name",
+		type: "text",
+		value: "",
+	},
+	{
+		id: "id_last_name",
+		label: "Last Name",
+		type: "text",
+		value: "",
+	},
+	{
+		id: "id_email",
+		label: "Email",
+		type: "email",
+		value: "",
+	},
+	{
+		id: "id_date_of_birth",
+		label: "Date of Birth",
+		type: "date",
+		value: "",
+	},
+];
 
 // to get all the forms from localStorage
 export const getLocalForms = (): formDataChecker[] => {
@@ -24,7 +51,7 @@ export const initialState = (id: string): formDataChecker => {
 	const newForm = {
 		id: id,
 		title: "",
-		formFields: [],
+		formFields: initialFormFields,
 	};
 	saveLocalForms([...formData, newForm]);
 	return newForm;
