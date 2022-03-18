@@ -48,6 +48,12 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 		setState(getInitialState(props.formId, questionId));
 	}, [props.formId, questionId]);
 
+	const handleAnswer = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newAns = [...answers];
+		newAns[questionId] = e.target.value;
+		setAnswers(newAns);
+	};
+
 	return (
 		<div className="flex flex-col flex-1">
 			<div className="flex w-full my-3 justify-between">
@@ -65,10 +71,9 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 						placeholder={question?.label}
 						type={question?.type}
 						value={answers[questionId]}
-						onChange={(e) => {
-							setAnswers({ ...answers, [questionId]: e.target.value });
-						}}
+						onChange={handleAnswer}
 					/>
+					{console.log(answers)}
 				</div>
 				<div className="flex justify-end w-full gap-2">
 					{questionId > 0 && (
