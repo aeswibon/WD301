@@ -73,7 +73,6 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 						value={answers[questionId]}
 						onChange={handleAnswer}
 					/>
-					{console.log(answers)}
 				</div>
 				<div className="flex justify-end w-full gap-2">
 					{questionId > 0 && (
