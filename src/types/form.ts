@@ -1,28 +1,38 @@
-type RadioField = {
+export type fieldType = "text" | "radio" | "dropdown";
+
+type BasicField = {
+	id: string;
+	label: string;
+	value: string;
+};
+
+type RadioField = BasicField & {
 	kind: "radio";
-	id: string;
-	label: string;
-	type: "radio";
-	value: string;
-};
-
-type TextField = {
-	kind: "text";
-	id: string;
-	label: string;
-	type: "text";
-	value: string;
-};
-
-type DropdownField = {
-	kind: "dropdown";
-	id: string;
-	label: string;
 	options: string[];
-	value: string;
 };
 
-export type formFields = RadioField | TextField | DropdownField;
+type TextField = BasicField & {
+	kind: "text";
+	type: "text";
+};
+
+type DropdownField = BasicField & {
+	kind: "dropdown";
+	options: string[];
+};
+
+type MultiSelectField = BasicField & {
+	kind: "multiselect";
+	options: string[];
+};
+
+
+
+export type formFields =
+	| RadioField
+	| TextField
+	| DropdownField
+	| MultiSelectField;
 export type formDataChecker = {
 	id: string;
 	title: string;

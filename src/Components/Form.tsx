@@ -1,10 +1,11 @@
 import { Link } from "raviger";
 import React from "react";
-import { formDataChecker, formFields } from "../types/form";
-import { handleSave, initialState } from "../utils/form";
+import { formDataChecker } from "../types/form";
+import { handleSave, initialState } from "../utils/storage";
+import { generateFormField } from "../utils/formFields";
 
 const Form = (props: { formId: string }): JSX.Element => {
-	const [form, setForm] = React.useState<formDataChecker>(
+	const [form, setForm] = React.useState<formDataChecker>(() =>
 		initialState(props.formId),
 	);
 	const [fieldInput, setFieldInput] = React.useState<string>("");
@@ -29,18 +30,11 @@ const Form = (props: { formId: string }): JSX.Element => {
 	};
 
 	// add form field
-  const AddField = () => {
+	const AddField = () => {
+		const newFormField = generateFormField(fieldType, fieldInput);
 		setForm({
 			...form,
-			formFields: [
-				...form.formFields,
-				{
-					id: new Date().getTime().toString(),
-					label: fieldInput,
-					type: 
-					value: "",
-				},
-			],
+			formFields: [...form.formFields, newFormField],
 		});
 		setFieldInput("");
 	};
@@ -64,6 +58,25 @@ const Form = (props: { formId: string }): JSX.Element => {
 						...field,
 						label: e.target.value,
 						value: e.target.value,
+					};
+				}
+				return field;
+			});
+			return {
+				...form,
+				formFields: updatedFormFields,
+			};
+		});
+	};
+
+	const AddOptions = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const options = e.target.value.split(",");
+		setForm((form) => {
+			const updatedFormFields = form.formFields.map((field) => {
+				if (field.id === e.target.id) {
+					return {
+						...field,
+						options: options,
 					};
 				}
 				return field;
@@ -101,7 +114,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 					className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800"
 					ref={titleRef}
 				/>
-				{/* {form.formFields.map((field) => (
+				{form.formFields.map((field) => (
 					<div key={field.id} className="w-full">
 						<span className="text-lg font-semibold px-2">{field.label}</span>
 						<div className="flex gap-4">
@@ -110,9 +123,19 @@ const Form = (props: { formId: string }): JSX.Element => {
 								value={field.value}
 								className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800"
 								onChange={handleInput}
-								type={field.type}
 								placeholder={field.label}
 							/>
+							{(field.kind === "dropdown" ||
+								field.kind === "radio" ||
+								field.kind === "multiselect") && (
+								<input
+									id={field.id}
+									value={field.options.join(",")}
+									className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800"
+									placeholder="Options comma(,) split"
+									onChange={AddOptions}
+								/>
+							)}
 							<button
 								type="button"
 								onClick={() => RemoveField(field.id)}
@@ -121,7 +144,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 							</button>
 						</div>
 					</div>
-				))} */}
+				))}
 				<div className="w-full">
 					<div className="flex gap-4">
 						<input
@@ -131,10 +154,13 @@ const Form = (props: { formId: string }): JSX.Element => {
 							onChange={handleAddField}
 							placeholder="Add new Field"
 						/>
-						<select onChange={(e) => setFieldType(e.target.value)}>
+						<select
+							className="border-2 rounded-lg bg-gray-200 py-2 px-4 my-2"
+							onChange={(e) => setFieldType(e.target.value)}>
 							<option value="text">Text</option>
 							<option value="dropdown">Dropdown</option>
 							<option value="radio">Radio</option>
+							<option value="multiselect">MultiSelect</option>
 						</select>
 						<button
 							type="button"
@@ -148,7 +174,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 			<div className="flex gap-4">
 				<Link
 					href="/"
-					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
+					className="p-4 mt-4 text-center bg-blue-600 rounded-lg w-full text-white font-bold">
 					Close Form
 				</Link>
 				<button
