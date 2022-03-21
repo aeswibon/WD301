@@ -9,7 +9,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 		initialState(props.formId),
 	);
 	const [fieldInput, setFieldInput] = React.useState<string>("");
-	const [fieldType, setFieldType] = React.useState<string>("");
+	const [fieldType, setFieldType] = React.useState<string>("text");
 
 	// focus on title of the form by default
 	const titleRef = React.useRef<HTMLInputElement>(null);
@@ -37,6 +37,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 			formFields: [...form.formFields, newFormField],
 		});
 		setFieldInput("");
+		setFieldType("");
 	};
 
 	React.useEffect(() => {

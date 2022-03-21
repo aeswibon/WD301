@@ -1,6 +1,6 @@
 export type fieldType = "text" | "radio" | "dropdown";
 
-type BasicField = {
+export type BasicField = {
 	id: string;
 	label: string;
 	value: string;
@@ -26,13 +26,12 @@ type MultiSelectField = BasicField & {
 	options: string[];
 };
 
-
-
 export type formFields =
 	| RadioField
 	| TextField
 	| DropdownField
 	| MultiSelectField;
+
 export type formDataChecker = {
 	id: string;
 	title: string;
