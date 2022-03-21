@@ -1,6 +1,6 @@
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React from "react";
 import { formDataChecker, formFieldChecker } from "../interfaces/form";
 import { getLocalForms } from "../utils/form";
@@ -35,9 +35,9 @@ const getInitialAnswerState = (form: formDataChecker) => {
 	const answers: formFieldChecker[] = [];
 	form.formFields.forEach((field, idx) => {
 		answers[idx] = {
-			id: "",
-			label: "",
-			type: "",
+			id: field.id,
+			label: field.label,
+			type: field.type,
 			value: "",
 		};
 	});
@@ -45,8 +45,8 @@ const getInitialAnswerState = (form: formDataChecker) => {
 };
 
 const PreviewForm = (props: { formId: string }): JSX.Element => {
-	const [state, setState] = React.useState(() =>
-		getInitialState(props.formId, 0),
+	const [state, setState] = React.useState(
+		() => getInitialState(props.formId, 0) || [],
 	);
 	const { form, question } = state;
 	const [questionId, setQuestionId] = React.useState(state.questionId);
@@ -59,15 +59,24 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 	}, [props.formId, questionId]);
 
 	const handleAnswer = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newAns = [...answers];
-		newAns[questionId] = {
-			id: question?.id,
-			label: question?.label,
-			type: question?.type,
-			value: e.target.value,
-		};
-		setAnswers(newAns);
+		setAnswers((answers) => {
+			const updatedAnswers = answers.map((answer) => {
+				if (answer.id === question?.id) {
+					return {
+						...answer,
+						value: e.target.value,
+					};
+				}
+				return answer;
+			});
+			return updatedAnswers;
+		});
 	};
+
+	const resetAnswers = () => {
+		setAnswers(() => getInitialAnswerState(form));
+	};
+
 	const handleSubmit = () => {
 		let msg = "Hello User,\n";
 		msg += "Your answers has been recorded.\n";
@@ -80,58 +89,73 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 	};
 
 	return (
-		<div className="flex flex-col w-full">
+		<div className="flex flex-col">
 			<div className="flex my-3 justify-between">
 				<h2 className="text-3xl font-semibold">{form.title}</h2>
 				<span>
 					Question {questionId + 1}/{form.formFields.length}
 				</span>
 			</div>
-			<div className="flex flex-col">
-				<div>
-					<label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-						{question?.label}
-					</label>
-					<input
-						className="appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
-						id={question?.id}
-						name={question?.label}
-						placeholder={question?.label}
-						type={question?.type}
-						value={answers[questionId].value}
-						onChange={handleAnswer}
-					/>
+			{question ? (
+				<div className="flex flex-col">
+					<div>
+						<label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+							{question?.label}
+						</label>
+						<input
+							className="appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
+							id={question?.id}
+							name={question?.label}
+							placeholder={question?.label}
+							type={question?.type}
+							value={answers[questionId].value}
+							onChange={handleAnswer}
+						/>
+					</div>
+					<div className="flex justify-end w-full gap-2">
+						{questionId > 0 && (
+							<button
+								type="button"
+								className="bg-blue-500 text-white font-bold py-2 px-4 my-4 rounded"
+								onClick={() =>
+									questionId > 0 && setQuestionId((questionId) => questionId - 1)
+								}>
+								<FontAwesomeIcon icon={faArrowLeft} /> Previous
+							</button>
+						)}
+						{questionId < form.formFields.length - 1 && (
+							<button
+								onClick={() =>
+									questionId < form.formFields.length - 1 &&
+									setQuestionId((questionId) => questionId + 1)
+								}
+								className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
+								Next <FontAwesomeIcon icon={faArrowRight} />
+							</button>
+						)}
+						{questionId === form.formFields.length - 1 && (
+							<button
+								onClick={handleSubmit}
+								className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
+								Submit
+							</button>
+						)}
+					</div>
 				</div>
-				{console.log(answers)}
-				<div className="flex justify-end w-full gap-2">
-					{questionId > 0 && (
-						<button
-							type="button"
-							className="bg-blue-500 text-white font-bold py-2 px-4 my-4 rounded"
-							onClick={() =>
-								questionId > 0 && setQuestionId((questionId) => questionId - 1)
-							}>
-							<FontAwesomeIcon icon={faArrowLeft} /> Previous
-						</button>
-					)}
-					{questionId < form.formFields.length - 1 && (
-						<button
-							onClick={() =>
-								questionId < form.formFields.length - 1 &&
-								setQuestionId((questionId) => questionId + 1)
-							}
-							className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
-							Next <FontAwesomeIcon icon={faArrowRight} />
-						</button>
-					)}
-					{questionId === form.formFields.length - 1 && (
-						<button
-							onClick={handleSubmit}
-							className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
-							Submit
-						</button>
-					)}
-				</div>
+			) : (
+				<span className="text-center text-lg font-bold">Invalid Question</span>
+			)}
+			<div className="flex gap-4 justify-center mt-8">
+				<Link
+					href="/"
+					className="bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold">
+					Close form
+				</Link>
+				<button
+					onClick={resetAnswers}
+					className="bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold">
+					Reset Answer
+				</button>
 			</div>
 		</div>
 	);

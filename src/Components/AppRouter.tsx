@@ -16,7 +16,7 @@ const AppRouter = () => {
 	const routeResult = useRoutes(routes);
 	return (
 		<div className="flex min-h-screen bg-gray-100 items-center overflow-auto">
-			<div className="m-auto w-1/3 p-8 mx-auto bg-white shadow-lg rounded-xl">
+			<div className="m-auto w-1/2 xl:w-1/3 p-8 mx-auto bg-white shadow-lg rounded-xl">
 				<Home />
 				{routeResult}
 			</div>

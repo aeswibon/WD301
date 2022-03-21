@@ -141,7 +141,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 			<div className="flex gap-4">
 				<Link
 					href="/"
-					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
+					className="p-4 mt-4 bg-blue-600 text-center rounded-lg w-full text-white font-bold">
 					Close Form
 				</Link>
 				<button
