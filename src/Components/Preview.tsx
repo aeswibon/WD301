@@ -143,7 +143,9 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 					</div>
 				</div>
 			) : (
-				<span className="text-center text-lg font-bold">Invalid Question</span>
+				<span className="text-center text-lg font-bold">
+					No question to preview
+				</span>
 			)}
 			<div className="flex gap-4 justify-center mt-8">
 				<Link
