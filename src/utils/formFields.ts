@@ -40,6 +40,16 @@ const multiselectFormField = (label: string): formFields => {
 	};
 };
 
+const fileUploadField = (label: string): formFields => {
+	return {
+		kind: "file-upload",
+		id: new Date().getTime().toString(),
+		label: label,
+		fileToUpload: null,
+		value: "",
+	};
+};
+
 export const generateFormField = (kind: string, label: string): formFields => {
 	switch (kind) {
 		case "text":
@@ -48,7 +58,9 @@ export const generateFormField = (kind: string, label: string): formFields => {
 			return dropdownFormField(label);
 		case "multiselect":
 			return multiselectFormField(label);
-		default:
+		case "radio":
 			return radioFormField(label);
+		default:
+			return fileUploadField(label);
 	}
 };

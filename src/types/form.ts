@@ -4,6 +4,7 @@ export type BasicField = {
 	id: string;
 	label: string;
 	value: string;
+	fileToUpload?: File | null;
 };
 
 type RadioField = BasicField & {
@@ -26,11 +27,16 @@ type MultiSelectField = BasicField & {
 	options: string[];
 };
 
+type FileUpload = BasicField & {
+	kind: "file-upload";
+};
+
 export type formFields =
 	| RadioField
 	| TextField
 	| DropdownField
-	| MultiSelectField;
+	| MultiSelectField
+	| FileUpload;
 
 export type formDataChecker = {
 	id: string;

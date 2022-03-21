@@ -72,6 +72,25 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 		});
 	};
 
+	const handleFileInput = (file: FileList | null) => {
+		if (file) {
+			const name: string | undefined = file.item(0)?.name;
+			setAnswers((answers) => {
+				const updatedAnswers = answers.map((answer) => {
+					if (answer.id === question?.id) {
+						return {
+							...answer,
+							value: name ? name : "file",
+							fileToUpload: file.item(0),
+						};
+					}
+					return answer;
+				});
+				return updatedAnswers;
+			});
+		}
+	};
+
 	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const value: string[] = [];
 		const options = e.target.options;
@@ -153,7 +172,7 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 									))}
 								</select>
 							</>
-						) : (
+						) : question?.kind === "radio" ? (
 							<div className="max-w-lg flex flex-wrap justify-start gap-x-4 gap-y-1">
 								{question?.options.map((option, index) => (
 									<div key={index} className="flex gap-2 items-center">
@@ -169,6 +188,12 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 									</div>
 								))}
 							</div>
+						) : (
+							<input
+								type="file"
+								accept=".jpg"
+								onChange={(e) => handleFileInput(e.target.files)}
+							/>
 						)}
 					</div>
 					<div className="flex justify-end w-full gap-2">

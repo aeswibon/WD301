@@ -162,6 +162,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 							<option value="dropdown">Dropdown</option>
 							<option value="radio">Radio</option>
 							<option value="multiselect">MultiSelect</option>
+							<option value="file-upload">File Upload</option>
 						</select>
 						<button
 							type="button"
