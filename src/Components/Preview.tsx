@@ -159,7 +159,7 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 							<>
 								<span>Use ctrl+click to select multiple</span>
 								<select
-									className="appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
+									className="form-control appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
 									multiple
 									name={question?.label}
 									placeholder={question?.label}
