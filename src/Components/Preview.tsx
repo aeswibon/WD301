@@ -1,120 +1,101 @@
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import React from "react";
-import { formDataChecker, BasicField } from "../types/form";
-import { getLocalForms } from "../utils/storage";
+import { formDataChecker, previewForm } from "../types/form";
+import { handleSave, initialPreviewState } from "../utils/storage";
+import { previewReducer } from "./reducers/PreviewReducer";
 
-const findForm = (formId: string): formDataChecker => {
-	const forms = getLocalForms();
-	const form = forms.find((form) => form.id === formId);
-	if (!form || form === undefined) {
-		navigate("/");
-	} else {
-		return form;
-	}
-	return forms[0];
-};
-
-const getInitialState = (formId: string, questionId: number) => {
-	const form = findForm(formId);
-	let question;
-	if (questionId && form.formFields.length > questionId) {
-		question = form.formFields[questionId];
-	} else {
-		question = form.formFields[0];
-	}
+const initialPreview = (
+	from: string,
+	to: string,
+	formId: string,
+): previewForm => {
+	const formAnswers = initialPreviewState(from, to, formId);
 	return {
-		form,
-		questionId,
-		question,
+		formAnswers,
+		activeIndex: 0,
 	};
-};
-
-const getInitialAnswerState = (form: formDataChecker) => {
-	const answers: BasicField[] = [];
-	form.formFields.forEach((field, idx) => {
-		answers[idx] = {
-			id: field.id,
-			label: field.label,
-			value: "",
-		};
-	});
-	return answers;
 };
 
 const PreviewForm = (props: { formId: string }): JSX.Element => {
-	const [state, setState] = React.useState(() =>
-		getInitialState(props.formId, 0),
+	const itemKey: string = "answerData";
+	const [previewState, dispatch] = React.useReducer(previewReducer, null, () =>
+		initialPreview("formData", itemKey, props.formId),
 	);
-	const { form, question } = state;
-	const [questionId, setQuestionId] = React.useState(state.questionId);
-	const [answers, setAnswers] = React.useState(() =>
-		getInitialAnswerState(form),
-	);
-
+	const form: formDataChecker = previewState.formAnswers;
 	React.useEffect(() => {
-		setState(getInitialState(props.formId, questionId));
-	}, [props.formId, questionId]);
-
-	const handleAnswer = (value: string) => {
-		setAnswers((answers) => {
-			const updatedAnswers = answers.map((answer) => {
-				if (answer.id === question?.id) {
-					return {
-						...answer,
-						value: value,
-					};
-				}
-				return answer;
-			});
-			return updatedAnswers;
-		});
-	};
-
-	const handleFileInput = (file: FileList | null) => {
-		if (file) {
-			const name: string | undefined = file.item(0)?.name;
-			setAnswers((answers) => {
-				const updatedAnswers = answers.map((answer) => {
-					if (answer.id === question?.id) {
-						return {
-							...answer,
-							value: name ? name : "file",
-							fileToUpload: file.item(0),
-						};
-					}
-					return answer;
-				});
-				return updatedAnswers;
-			});
-		}
-	};
-
-	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const value: string[] = [];
-		const options = e.target.options;
-		for (let i = 0; i < options.length; i++) {
-			if (options[i].selected) {
-				value.push(options[i].value);
-			}
-		}
-		handleAnswer(value.join(","));
-	};
-
-	const resetAnswers = () => {
-		setAnswers(() => getInitialAnswerState(form));
-	};
+		let timeout = setTimeout(() => {
+			handleSave(itemKey, form);
+		}, 100);
+		return () => {
+			clearTimeout(timeout);
+		};
+	}, [form]);
 
 	const handleSubmit = () => {
 		let msg = "Hello User,\n";
 		msg += "Your answers has been recorded.\n";
 		msg += `Form title: ${form.title}\n\n`;
-		answers.forEach((answer) => {
-			msg += `${answer.label}: ${answer.value}\n`;
+		form.formFields.forEach((field) => {
+			msg += `${field.label}: ${field.value}\n`;
 		});
 		msg += "\nThank you for your time.";
 		alert(msg);
+	};
+
+	// get the next active index
+	const nextField = () => {
+		let currentIndex = previewState.activeIndex;
+		const len = form.formFields.length;
+		currentIndex = currentIndex >= len - 2 ? len - 1 : currentIndex + 1;
+		dispatch({
+			type: "update_active_index",
+			curr_idx: currentIndex,
+		});
+	};
+
+	// get the previous active index
+	const previousField = () => {
+		let currentIndex = previewState.activeIndex;
+		currentIndex = currentIndex <= 1 ? 0 : currentIndex - 1;
+		dispatch({
+			type: "update_active_index",
+			curr_idx: currentIndex,
+		});
+	};
+
+	// dispatch the answer forms
+	const handleAnswer = (id: string, value: string) => {
+		dispatch({
+			type: "update_answer",
+			id,
+			value,
+		});
+	};
+
+	const handleChange = (id: string, data: HTMLOptionsCollection) => {
+		const value: string[] = [];
+		const options = data;
+		for (let i = 0; i < options.length; i++) {
+			if (options[i].selected) {
+				value.push(options[i].value);
+			}
+		}
+		console.log(id);
+		handleAnswer(id, value.join(","));
+	};
+
+	const handleInput = (id: string, file: FileList | null) => {
+		if (file) {
+			const name: string | undefined = file.item(0)?.name;
+			dispatch({
+				type: "update_answer",
+				id,
+				value: name ? name : "file",
+				fileToUpload: file.item(0),
+			});
+		}
 	};
 
 	return (
@@ -122,115 +103,120 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 			<div className="flex my-3 justify-between">
 				<h2 className="text-3xl font-semibold">{form.title}</h2>
 				<span>
-					Question {questionId + 1}/{form.formFields.length}
+					Question {previewState.activeIndex + 1}/{form.formFields.length}
 				</span>
 			</div>
-			{question ? (
-				<div className="flex flex-col">
-					<div>
-						<label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-							{question?.label}
-						</label>
-						{question?.kind === "text" ? (
-							<input
-								className="appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
-								id={question?.id}
-								type="text"
-								name={question?.label}
-								placeholder={question?.label}
-								value={answers[questionId].value}
-								onChange={(e) => handleAnswer(e.target.value)}
-							/>
-						) : question?.kind === "dropdown" ? (
-							<select
-								className="appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
-								name={question?.label}
-								placeholder={question?.label}
-								value={answers[questionId].value}
-								onChange={(e) => handleAnswer(e.target.value)}>
-								<option value="">Select an option</option>
-								{question?.options.map((option, index) => (
-									<option key={index} value={option}>
-										{option}
-									</option>
-								))}
-							</select>
-						) : question?.kind === "multiselect" ? (
-							<>
-								<span>Use ctrl+click to select multiple</span>
-								<select
-									className="form-control appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
-									multiple
-									name={question?.label}
-									placeholder={question?.label}
-									value={answers[questionId].value}
-									onChange={handleChange}>
-									{question?.options.map((option, index) => (
-										<option key={index} value={option}>
-											{option}
-										</option>
-									))}
-								</select>
-							</>
-						) : question?.kind === "radio" ? (
-							<div className="max-w-lg flex flex-wrap justify-start gap-x-4 gap-y-1">
-								{question?.options.map((option, index) => (
-									<div key={index} className="flex gap-2 items-center">
-										<input
-											className="w-4 h-4"
-											type="radio"
-											name={question?.label}
-											checked={answers[questionId].value === option}
-											value={option}
-											onChange={(e) => handleAnswer(e.target.value)}
-										/>
-										<label>{option}</label>
+			{form.formFields.length > 0 ? (
+				form.formFields.map((question, index) => {
+					return (
+						<React.Fragment key={index}>
+							{previewState.activeIndex === index && (
+								<div className="flex flex-col">
+									<div>
+										<label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+											{question?.label}
+										</label>
+										{question?.kind === "text" ? (
+											<input
+												className="appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
+												id={question?.id}
+												type="text"
+												name={question?.label}
+												placeholder={question?.label}
+												value={question?.value}
+												onChange={(e) => handleAnswer(question?.id, e.target.value)}
+											/>
+										) : question?.kind === "dropdown" ? (
+											<select
+												className="appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
+												name={question?.label}
+												placeholder={question?.label}
+												value={question?.value}
+												onChange={(e) => handleAnswer(question?.id, e.target.value)}>
+												<option value="">Select an option</option>
+												{question?.options.map((option, index) => (
+													<option key={index} value={option}>
+														{option}
+													</option>
+												))}
+											</select>
+										) : question?.kind === "multiselect" ? (
+											<>
+												<span>Use ctrl+click to select multiple</span>
+												<select
+													className="form-control appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
+													multiple
+													name={question?.label}
+													placeholder={question?.label}
+													// value={question?.value}
+													onChange={(e) => handleChange(question?.id, e.target.options)}>
+													{question?.options.map((option, index) => (
+														<option key={index} value={option}>
+															{option}
+														</option>
+													))}
+												</select>
+											</>
+										) : question?.kind === "radio" ? (
+											<div className="max-w-lg flex flex-wrap justify-start gap-x-4 gap-y-1">
+												{question?.options.map((option, index) => (
+													<div key={index} className="flex gap-2 items-center">
+														<input
+															className="w-4 h-4"
+															type="radio"
+															name={question?.label}
+															checked={question?.value === option}
+															value={option}
+															onChange={(e) => handleAnswer(question?.id, e.target.value)}
+														/>
+														<label>{option}</label>
+													</div>
+												))}
+											</div>
+										) : (
+											<input
+												type="file"
+												accept=".jpg"
+												onChange={(e) => handleInput(question?.id, e.target.files)}
+											/>
+										)}
 									</div>
-								))}
-							</div>
-						) : (
-							<input
-								type="file"
-								accept=".jpg"
-								onChange={(e) => handleFileInput(e.target.files)}
-							/>
-						)}
-					</div>
-					<div className="flex justify-end w-full gap-2">
-						{questionId > 0 && (
-							<button
-								type="button"
-								className="bg-blue-500 text-white font-bold py-2 px-4 my-4 rounded"
-								onClick={() =>
-									questionId > 0 && setQuestionId((questionId) => questionId - 1)
-								}>
-								<FontAwesomeIcon icon={faArrowLeft} /> Previous
-							</button>
-						)}
-						{questionId < form.formFields.length - 1 && (
-							<button
-								onClick={() =>
-									questionId < form.formFields.length - 1 &&
-									setQuestionId((questionId) => questionId + 1)
-								}
-								className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
-								Next <FontAwesomeIcon icon={faArrowRight} />
-							</button>
-						)}
-						{questionId === form.formFields.length - 1 && (
-							<button
-								onClick={handleSubmit}
-								className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
-								Submit
-							</button>
-						)}
-					</div>
-				</div>
+									<div className="flex justify-end w-full gap-2">
+										{previewState.activeIndex > 0 && (
+											<button
+												type="button"
+												className="bg-blue-500 text-white font-bold py-2 px-4 my-4 rounded"
+												onClick={previousField}>
+												<FontAwesomeIcon icon={faArrowLeft} /> Previous
+											</button>
+										)}
+										{previewState.activeIndex < form.formFields.length - 1 && (
+											<button
+												type="button"
+												className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded"
+												onClick={nextField}>
+												Next <FontAwesomeIcon icon={faArrowRight} />
+											</button>
+										)}
+										{previewState.activeIndex === form.formFields.length - 1 && (
+											<button
+												onClick={handleSubmit}
+												className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
+												Submit
+											</button>
+										)}
+									</div>
+								</div>
+							)}
+						</React.Fragment>
+					);
+				})
 			) : (
 				<span className="text-center text-lg font-bold">
 					No question to preview
 				</span>
 			)}
+
 			<div className="flex gap-4 justify-center mt-8">
 				<Link
 					href="/"
@@ -238,7 +224,12 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 					Close form
 				</Link>
 				<button
-					onClick={resetAnswers}
+					type="button"
+					onClick={() => {
+						dispatch({
+							type: "reset_answer",
+						});
+					}}
 					className="bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold">
 					Reset Answer
 				</button>

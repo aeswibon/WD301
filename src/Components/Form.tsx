@@ -1,15 +1,27 @@
 import { Link } from "raviger";
 import React from "react";
-import { formDataChecker } from "../types/form";
+import { initialFormField } from "../types/form";
 import { handleSave, initialState } from "../utils/storage";
-import { generateFormField } from "../utils/formFields";
+import { NewFieldReducer } from "./reducers/FieldReducer";
+import { formReducer } from "./reducers/formReducer";
+
+const initialField: initialFormField = {
+	label: "",
+	kind: "",
+	type: "text",
+	options: "",
+	fileToUpload: null,
+};
 
 const Form = (props: { formId: string }): JSX.Element => {
-	const [form, setForm] = React.useState<formDataChecker>(() =>
-		initialState(props.formId),
+	const itemKey: string = "formData";
+	const [fieldState, dispatchField] = React.useReducer(
+		NewFieldReducer,
+		initialField,
 	);
-	const [fieldInput, setFieldInput] = React.useState<string>("");
-	const [fieldType, setFieldType] = React.useState<string>("text");
+	const [form, dispatch] = React.useReducer(formReducer, null, () =>
+		initialState(itemKey, props.formId),
+	);
 
 	// focus on title of the form by default
 	const titleRef = React.useRef<HTMLInputElement>(null);
@@ -19,91 +31,35 @@ const Form = (props: { formId: string }): JSX.Element => {
 		return () => {
 			document.title = "React Form";
 		};
-	}, []);
+	}, [form.title]);
 
 	// remove form field
-	const RemoveField = (field_id: string) => {
-		setForm({
-			...form,
-			formFields: form.formFields.filter((f) => f.id !== field_id),
+	const RemoveField = (id: string) => {
+		dispatch({
+			type: "remove_field",
+			id,
 		});
 	};
 
 	// add form field
 	const AddField = () => {
-		const newFormField = generateFormField(fieldType, fieldInput);
-		setForm({
-			...form,
-			formFields: [...form.formFields, newFormField],
+		dispatch({
+			type: "add_field",
+			fieldData: fieldState,
+			callback: () => {
+				dispatchField({
+					type: "clear_field",
+				});
+			},
 		});
-		setFieldInput("");
-		setFieldType("");
 	};
 
 	React.useEffect(() => {
 		let timeout = setTimeout(() => {
-			handleSave(form);
+			handleSave(itemKey, form);
 		}, 100);
 		return () => clearTimeout(timeout);
 	}, [form]);
-
-	const handleAddField = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFieldInput(e.target.value);
-	};
-
-	const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setForm((form) => {
-			const updatedFormFields = form.formFields.map((field) => {
-				if (field.id === e.target.id) {
-					return {
-						...field,
-						label: e.target.value,
-						value: e.target.value,
-					};
-				}
-				return field;
-			});
-			return {
-				...form,
-				formFields: updatedFormFields,
-			};
-		});
-	};
-
-	const AddOptions = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const options = e.target.value.split(",");
-		setForm((form) => {
-			const updatedFormFields = form.formFields.map((field) => {
-				if (field.id === e.target.id) {
-					return {
-						...field,
-						options: options,
-					};
-				}
-				return field;
-			});
-			return {
-				...form,
-				formFields: updatedFormFields,
-			};
-		});
-	};
-
-	const ClearForm = () => {
-		setForm((form) => {
-			const updatedFormFields = form.formFields.map((field) => {
-				return {
-					...field,
-					value: "",
-				};
-			});
-			return {
-				...form,
-				formFields: updatedFormFields,
-			};
-		});
-		setFieldInput("");
-	};
 
 	return (
 		<div>
@@ -111,7 +67,7 @@ const Form = (props: { formId: string }): JSX.Element => {
 				<input
 					type="text"
 					value={form.title}
-					onChange={(e) => setForm({ ...form, title: e.target.value })}
+					onChange={(e) => dispatch({ type: "update_title", title: e.target.value })}
 					className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800"
 					ref={titleRef}
 				/>
@@ -121,9 +77,15 @@ const Form = (props: { formId: string }): JSX.Element => {
 						<div className="flex gap-4">
 							<input
 								id={field.id}
-								value={field.value}
+								value={field.label}
 								className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800"
-								onChange={handleInput}
+								onChange={(e) =>
+									dispatch({
+										type: "update_label",
+										id: field.id,
+										value: e.target.value,
+									})
+								}
 								placeholder={field.label}
 							/>
 							{(field.kind === "dropdown" ||
@@ -134,7 +96,13 @@ const Form = (props: { formId: string }): JSX.Element => {
 									value={field.options.join(",")}
 									className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800"
 									placeholder="Options comma(,) split"
-									onChange={AddOptions}
+									onChange={(e) =>
+										dispatch({
+											type: "update_options",
+											id: field.id,
+											options: e.target.value,
+										})
+									}
 								/>
 							)}
 							<button
@@ -149,15 +117,26 @@ const Form = (props: { formId: string }): JSX.Element => {
 				<div className="w-full">
 					<div className="flex gap-4">
 						<input
-							value={fieldInput}
+							value={fieldState.label}
 							className="border-2 border-gray-200 bg-gray-200 rounded-lg p-4 my-2 w-full outline-none hover:outline-blue-800"
 							type="text"
-							onChange={handleAddField}
+							onChange={(e) =>
+								dispatchField({
+									type: "update_label",
+									value: e.target.value,
+								})
+							}
 							placeholder="Add new Field"
 						/>
 						<select
+							value={fieldState.kind}
 							className="border-2 rounded-lg bg-gray-200 py-2 px-4 my-2"
-							onChange={(e) => setFieldType(e.target.value)}>
+							onChange={(e) =>
+								dispatchField({ type: "update_field_kind", value: e.target.value })
+							}>
+							<option disabled value="">
+								Select input kind
+							</option>
 							<option value="text">Text</option>
 							<option value="dropdown">Dropdown</option>
 							<option value="radio">Radio</option>
@@ -179,12 +158,6 @@ const Form = (props: { formId: string }): JSX.Element => {
 					className="p-4 mt-4 text-center bg-blue-600 rounded-lg w-full text-white font-bold">
 					Close Form
 				</Link>
-				<button
-					type="button"
-					onClick={ClearForm}
-					className="p-4 mt-4 bg-blue-600 rounded-lg w-full text-white font-bold">
-					Clear form
-				</button>
 			</div>
 		</div>
 	);

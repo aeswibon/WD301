@@ -1,19 +1,19 @@
-import { formDataChecker } from "../types/form";
+import { formDataChecker } from "./../types/form";
 
 // to get all the forms from localStorage
-export const getLocalForms = (): formDataChecker[] => {
-	const localForms = localStorage.getItem("formData");
+export const getLocalForms = (key: string): formDataChecker[] => {
+	const localForms = localStorage.getItem(key);
 	return localForms ? JSON.parse(localForms) : [];
 };
 
 // save the form in localStorage
-export const saveLocalForms = (forms: formDataChecker[]) => {
-	localStorage.setItem("formData", JSON.stringify(forms));
+export const saveLocalForms = (key: string, forms: formDataChecker[]) => {
+	localStorage.setItem(key, JSON.stringify(forms));
 };
 
 // to initiate the state of the form
-export const initialState = (id: string): formDataChecker => {
-	const formData = getLocalForms();
+export const initialState = (key: string, id: string): formDataChecker => {
+	const formData = getLocalForms(key);
 	if (formData.length > 0) {
 		for (let i = 0; i < formData.length; i++) {
 			if (formData[i].id === id) {
@@ -26,18 +26,26 @@ export const initialState = (id: string): formDataChecker => {
 		title: "",
 		formFields: [],
 	};
-	saveLocalForms([...formData, newForm]);
+	saveLocalForms(key, [...formData, newForm]);
 	return newForm;
 };
 
 // save the form on each input
-export const handleSave = (field: formDataChecker) => {
-	const formData = getLocalForms();
-	const updateFormData = formData.map((f) => {
-		if (f.id === field.id) {
-			return field;
-		}
-		return f;
-	});
-	saveLocalForms(updateFormData);
+export const handleSave = (key: string, field: formDataChecker) => {
+	const formData = getLocalForms(key);
+	const updateFormData = formData.map((f) => (f.id === field.id ? field : f));
+	saveLocalForms(key, updateFormData);
+};
+
+export const initialPreviewState = (from: string, to: string, id: string) => {
+	const formData = getLocalForms(from);
+	const form = formData.find((form) => form.id === id);
+	const newForm = {
+		id: new Date().getTime().toString(),
+		title: form ? form.title : "",
+		formFields: form ? form.formFields : [],
+	};
+	const answerForm = getLocalForms(to);
+	saveLocalForms(to, [...answerForm, newForm]);
+	return newForm;
 };

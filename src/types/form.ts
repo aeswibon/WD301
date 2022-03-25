@@ -43,3 +43,16 @@ export type formDataChecker = {
 	title: string;
 	formFields: formFields[];
 };
+
+export type initialFormField = {
+	label: string;
+	kind: string;
+	type: string;
+	options: string;
+	fileToUpload: File | null;
+};
+
+export type previewForm = {
+	activeIndex: number;
+	formAnswers: formDataChecker;
+};
