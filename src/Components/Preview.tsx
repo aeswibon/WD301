@@ -24,6 +24,9 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 		initialPreview("formData", itemKey, props.formId),
 	);
 	const form: formDataChecker = previewState.formAnswers;
+	const [open, setOpen] = React.useState<boolean>(false);
+	const [selected, setSelected] = React.useState<string[]>([]);
+
 	React.useEffect(() => {
 		let timeout = setTimeout(() => {
 			handleSave(itemKey, form);
@@ -74,16 +77,22 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 		});
 	};
 
-	const handleChange = (id: string, data: HTMLOptionsCollection) => {
-		const value: string[] = [];
-		const options = data;
-		for (let i = 0; i < options.length; i++) {
-			if (options[i].selected) {
-				value.push(options[i].value);
-			}
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const item = e.target.value;
+		if (e.target.checked) {
+			setSelected((p) => {
+				return [...p, item];
+			});
+		} else {
+			setSelected((p) => {
+				return [...p.filter((i) => i !== item)];
+			});
 		}
-		console.log(id);
-		handleAnswer(id, value.join(","));
+		dispatch({
+			type: "update_answer",
+			id: e.target.id,
+			value: selected.join(","),
+		});
 	};
 
 	const handleInput = (id: string, file: FileList | null) => {
@@ -96,6 +105,14 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 				fileToUpload: file.item(0),
 			});
 		}
+	};
+
+	const resetAnswers = () => {
+		setOpen(false);
+		setSelected([]);
+		dispatch({
+			type: "reset_answer",
+		});
 	};
 
 	return (
@@ -142,20 +159,53 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 											</select>
 										) : question?.kind === "multiselect" ? (
 											<>
-												<span>Use ctrl+click to select multiple</span>
-												<select
-													className="form-control appearance-none block w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none"
-													multiple
-													name={question?.label}
-													placeholder={question?.label}
-													// value={question?.value}
-													onChange={(e) => handleChange(question?.id, e.target.options)}>
-													{question?.options.map((option, index) => (
-														<option key={index} value={option}>
-															{option}
-														</option>
-													))}
-												</select>
+												<div
+													onClick={() => {
+														setOpen((p) => !p);
+													}}
+													className="appearance-none w-full bg-slate-100 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none flex justify-between items-center hover:cursor-pointer">
+													{selected.length > 0 ? (
+														<div>{selected.join(",")}</div>
+													) : (
+														<div>Select</div>
+													)}
+													<span className="before:content-['▼']"></span>
+												</div>
+												{open && (
+													<div>
+														<div className="flex gap-2 items-center hover:text-white hover:bg-blue-500 hover:cursor-pointer">
+															<input
+																type="checkbox"
+																name={"Select all"}
+																className="p-2"
+																onChange={(e) => {
+																	if (e.target.checked) {
+																		setSelected(question?.options);
+																	} else setSelected([]);
+																}}
+															/>
+															<label>Select all</label>
+														</div>
+														{question?.options.map((option, index) => {
+															return (
+																<div
+																	key={index}
+																	className="flex gap-2 items-center hover:text-white hover:bg-blue-500 hover:cursor-pointer">
+																	<input
+																		type="checkbox"
+																		id={question?.id}
+																		name={option}
+																		value={option}
+																		onChange={handleChange}
+																		checked={selected.includes(option)}
+																		className="p-2"
+																	/>
+																	<label>{option}</label>
+																</div>
+															);
+														})}
+													</div>
+												)}
 											</>
 										) : question?.kind === "radio" ? (
 											<div className="max-w-lg flex flex-wrap justify-start gap-x-4 gap-y-1">
@@ -225,11 +275,7 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 				</Link>
 				<button
 					type="button"
-					onClick={() => {
-						dispatch({
-							type: "reset_answer",
-						});
-					}}
+					onClick={resetAnswers}
 					className="bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold">
 					Reset Answer
 				</button>
