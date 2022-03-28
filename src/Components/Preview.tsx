@@ -118,6 +118,7 @@ const PreviewForm = (props: { formId: string }): JSX.Element => {
 
 	React.useEffect(() => {
 		handleAnswer(selected.join(","));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
 	const handleSubmit = () => {
