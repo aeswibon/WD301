@@ -2,7 +2,7 @@
 
 ## Levels updates
 
-✅ ❓ Level 5 Done (Review Pending)
+✅ ❓ Level 6 Done (Review Pending)
 
 ## Setting Up the Project
 
