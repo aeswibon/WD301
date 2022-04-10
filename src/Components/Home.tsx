@@ -1,7 +1,8 @@
 import logo from "../assets/logo.svg";
-import { Link } from "raviger";
+import { ActiveLink } from "raviger";
+import { User } from "../types/form";
 
-const Home = (): JSX.Element => {
+const Home = (props: { user: User }): JSX.Element => {
 	return (
 		<>
 			<div className="flex gap-2 justify-between items-center ">
@@ -12,11 +13,38 @@ const Home = (): JSX.Element => {
 					alt="logo"
 				/>
 				<div className="flex gap-3">
-					<Link
-						className="text-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
-						href="/">
-						Home
-					</Link>
+					{[
+						{ page: "Home", url: "/" },
+						...(props.user?.username?.length > 0
+							? [
+									{
+										page: "Logout",
+										onClick: () => {
+											localStorage.removeItem("token");
+											window.location.href = "/login";
+										},
+									},
+							  ]
+							: [{ page: "Login", url: "/login" }]),
+					].map((link) =>
+						link.url ? (
+							<ActiveLink
+								key={link.url}
+								href={link.url}
+								className="text-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
+								exactActiveClass="text-blue-600 border-b-2 bg-white border-blue-700">
+								{link.page}
+							</ActiveLink>
+						) : (
+							<button
+								type="button"
+								key={link.page}
+								onClick={link.onClick}
+								className="text-white bg-blue-600 p-2 m-2 uppercase font-semibold">
+								{link.page}
+							</button>
+						),
+					)}
 				</div>
 			</div>
 		</>

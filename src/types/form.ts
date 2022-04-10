@@ -1,58 +1,45 @@
-export type fieldType = "text" | "radio" | "dropdown";
-
-export type BasicField = {
-	id: string;
-	label: string;
-	value: string;
-	fileToUpload?: File | null;
+export type User = {
+	username: string;
+	name?: string;
+	url?: string;
 };
-
-type RadioField = BasicField & {
-	kind: "radio";
-	options: string[];
-};
-
-type TextField = BasicField & {
-	kind: "text";
-	type: "text";
-};
-
-type DropdownField = BasicField & {
-	kind: "dropdown";
-	options: string[];
-};
-
-type MultiSelectField = BasicField & {
-	kind: "multiselect";
-	options: string[];
-};
-
-type FileUpload = BasicField & {
-	kind: "file-upload";
-};
-
-export type formFields =
-	| RadioField
-	| TextField
-	| DropdownField
-	| MultiSelectField
-	| FileUpload;
-
 export type formDataChecker = {
-	id: string;
+	id?: number;
 	title: string;
-	formFields: formFields[];
+	description?: string;
+	is_public?: boolean;
+	created_by?: number;
+	created_date?: Date;
+	modified_date?: Date;
 };
 
-export type initialFormField = {
+export type fieldChecker = {
+	id?: number;
 	label: string;
-	kind: string;
-	type: string;
-	options: string;
-	fileToUpload: File | null;
+	kind: "TEXT" | "DROPDOWN" | "RADIO" | "NULL";
+	options?: string;
+	value?: string;
+	meta?: string;
 };
 
-export type previewForm = {
+export type FormField = FormData & {
+	formFields: fieldChecker[];
+};
+
+export type PreviewForm = {
+	formData: FormData;
+	formFields: fieldChecker[];
 	activeIndex: number;
-	formAnswers: formDataChecker;
+};
+
+export type Answer = {
+	form_field: number;
+	value: string;
+};
+
+export type Submission = {
+	answers: Answer[];
+	id?: number;
+	form?: formDataChecker;
+	created_date?: Date;
 };

@@ -1,66 +1,31 @@
-import { formFields } from "../types/form";
+import { fieldChecker, formDataChecker } from "./../types/form";
+import { Error } from "../types/pagination";
 
-const textFormField = (label: string): formFields => {
-	return {
-		kind: "text",
-		id: new Date().getTime().toString(),
-		label: label,
-		type: "text",
-		value: "",
-	};
-};
-
-const dropdownFormField = (label: string): formFields => {
-	return {
-		kind: "dropdown",
-		id: new Date().getTime().toString(),
-		label: label,
-		options: [],
-		value: "",
-	};
-};
-
-const radioFormField = (label: string): formFields => {
-	return {
-		kind: "radio",
-		id: new Date().getTime().toString(),
-		label: label,
-		options: [],
-		value: "",
-	};
-};
-
-const multiselectFormField = (label: string): formFields => {
-	return {
-		kind: "multiselect",
-		id: new Date().getTime().toString(),
-		label: label,
-		options: [],
-		value: "",
-	};
-};
-
-const fileUploadField = (label: string): formFields => {
-	return {
-		kind: "file-upload",
-		id: new Date().getTime().toString(),
-		label: label,
-		fileToUpload: null,
-		value: "",
-	};
-};
-
-export const generateFormField = (kind: string, label: string): formFields => {
-	switch (kind) {
-		case "text":
-			return textFormField(label);
-		case "dropdown":
-			return dropdownFormField(label);
-		case "multiselect":
-			return multiselectFormField(label);
-		case "radio":
-			return radioFormField(label);
-		default:
-			return fileUploadField(label);
+export const validateForm = (form: formDataChecker) => {
+	const errors: Error<formDataChecker> = {};
+	if (form.title.length < 1) {
+		errors.title = "Title is required";
 	}
+	if (form.title.length > 100) {
+		errors.title = "Title must be less than 100 characters";
+	}
+
+	return errors;
+};
+
+export const validateFormField = (field: fieldChecker) => {
+	const errors: Error<fieldChecker> = {};
+	if (field.label.length < 1) {
+		errors.label = "Label is required";
+	}
+	if (field.label.length > 100) {
+		errors.label = "Label must be less than 100 characters";
+	}
+	if (
+		(field.kind === "DROPDOWN" || field.kind === "RADIO") &&
+		(!field.options || field.options.length < 1)
+	) {
+		errors.options = "Options are required for dropdown and radio fields";
+	}
+	return errors;
 };

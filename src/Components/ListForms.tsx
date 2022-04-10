@@ -3,38 +3,96 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faEye, faTrashAlt } from "@fortawesome/free-regular-svg-icons";
 import { formDataChecker } from "../types/form";
 import { Link, useQueryParams } from "raviger";
+import { Pagination, PaginationData } from "../types/pagination";
+import { listForms } from "../utils/apiUtil";
+import Loading from "./Loading";
+import PaginationContainer from "./Pagination";
+import AddForm from "./AddForm";
+
+const fetchFormsData = async (
+	setForms: React.Dispatch<
+		React.SetStateAction<PaginationData<formDataChecker>>
+	>,
+	setLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+	offset?: number,
+	limit?: number,
+) => {
+	try {
+		if (setLoading) {
+			setLoading(true);
+		}
+		const offsetValue: number = offset ? offset : 0;
+		const limitValue: number = limit ? limit : 5;
+		const data: Pagination<formDataChecker> = await listForms({
+			offset: offsetValue,
+			limit: limitValue,
+		});
+
+		setForms({
+			count: data.count,
+			prev: data.prev,
+			next: data.next,
+			results: data.results,
+			limit: limitValue,
+			activePage: offsetValue ? offsetValue / limitValue + 1 : 1,
+		});
+	} catch (error) {
+		console.error(error);
+	} finally {
+		if (setLoading) {
+			setLoading(false);
+		}
+	}
+};
 
 const ListForms = (): JSX.Element => {
+	const [loading, setLoading] = React.useState(false);
+	const [forms, setForms] = React.useState<PaginationData<formDataChecker>>({
+		count: 0,
+		prev: null,
+		next: null,
+		results: [],
+		limit: 5,
+		activePage: 0,
+	});
 	const [{ search }, setQueryParams] = useQueryParams();
-	const [forms, setForms] = React.useState<formDataChecker[]>([]);
 	const [filterForms, setFilterForms] = React.useState<formDataChecker[]>([]);
 
-	// get all the forms from localStorage
+	// get all the forms using api
 	React.useEffect(() => {
-		const localForms = localStorage.getItem("formData");
-		if (localForms) {
-			setForms(JSON.parse(localForms));
-			setFilterForms(JSON.parse(localForms));
-		}
+		fetchFormsData(setForms, setLoading);
 	}, []);
+
+	// paginate the forms list
+	const onPageChange = (page: number) => {
+		const offset = (page - 1) * forms.limit;
+		fetchFormsData(setForms, setLoading, offset, forms.limit);
+	};
 
 	// search the form
 	React.useEffect(() => {
-		const filterData = forms.filter((form) =>
+		const filterData = forms.results.filter((form) =>
 			form.title.toLowerCase().includes(search?.trim().toLowerCase() || ""),
 		);
 		setFilterForms(() => filterData);
 	}, [search, forms]);
 
 	// delete the form
-	const handleDelete = (id: string) => {
-		const updatedForms = forms.filter((form: formDataChecker) => form.id !== id);
-		setForms(updatedForms);
-		localStorage.setItem("formData", JSON.stringify(updatedForms));
+	const handleDelete = (id: Number | undefined) => {
+		if (id) {
+			const updatedForms = forms.results.filter(
+				(form: formDataChecker) => form.id !== id,
+			);
+			setForms({
+				...forms,
+				results: updatedForms,
+			});
+		}
 	};
 
 	return (
 		<>
+			{loading && <Loading />}
 			<div className="flex flex-wrap -mx-3 mb-6">
 				<div className="w-full px-3">
 					<label
@@ -53,27 +111,22 @@ const ListForms = (): JSX.Element => {
 					/>
 				</div>
 			</div>
-			{filterForms.length > 0 ? (
-				<div>
-					<span>Below are all the forms stored in local storage:</span>
-				</div>
-			) : (
-				<div>Currently there are zero forms</div>
+			{search !== undefined && search !== "" && (
+				<h2 className="text-xl font-bold mb-4">Search results for "{search}"</h2>
 			)}
+
 			{filterForms.length > 0 &&
 				filterForms.map((form: formDataChecker) => (
 					<div key={form.id} className="w-full">
 						<div className="flex gap-4">
-							<p
-								id={form.id}
-								className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800">
+							<p className="border-2 border-gray-200 bg-gray-200 rounded-lg p-2 my-2 w-full outline-none hover:outline-blue-800">
 								{form.title}
 							</p>
 							<div className="flex space-x-2">
 								<Link href={`/preview/${form.id}`} className="m-auto">
 									<FontAwesomeIcon icon={faEye} />
 								</Link>
-								<Link href={`/form/${form.id}`} className="m-auto">
+								<Link href={`/forms/${form.id}`} className="m-auto">
 									<FontAwesomeIcon icon={faEdit} />
 								</Link>
 								<button onClick={() => handleDelete(form.id)}>
@@ -83,12 +136,16 @@ const ListForms = (): JSX.Element => {
 						</div>
 					</div>
 				))}
+
+			<PaginationContainer
+				count={forms.count}
+				limit={forms.limit}
+				activePage={forms.activePage}
+				onPageChangeCB={onPageChange}
+			/>
 			<div className="my-4">
-				<Link
-					href={`/form/${new Date().getTime().toString()}`}
-					className="p-4 mt-10 bg-blue-600 rounded-lg w-full text-white font-bold">
-					Add a form
-				</Link>
+				<AddForm />
+				Add a form
 			</div>
 		</>
 	);
