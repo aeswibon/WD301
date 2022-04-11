@@ -51,7 +51,7 @@ export default function MultiselectInput(props: MultiselectInputProps) {
 				<span className="before:content-['▼']"></span>
 			</div>
 			{open && (
-				<div>
+				<div className="px-2">
 					<div className="flex gap-2 items-center hover:text-white hover:bg-blue-500 hover:cursor-pointer">
 						<input
 							type="checkbox"

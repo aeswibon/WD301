@@ -21,11 +21,5 @@ export const validateFormField = (field: fieldChecker) => {
 	if (field.label.length > 100) {
 		errors.label = "Label must be less than 100 characters";
 	}
-	if (
-		(field.kind === "DROPDOWN" || field.kind === "RADIO") &&
-		(!field.options || field.options.length < 1)
-	) {
-		errors.options = "Options are required for dropdown and radio fields";
-	}
 	return errors;
 };

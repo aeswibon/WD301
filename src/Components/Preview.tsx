@@ -22,7 +22,6 @@ import DropdownInput from "./inputs/DropdownInput";
 import RadioInput from "./inputs/RadioInput";
 import MultiselectInput from "./inputs/MultiselectInput";
 import TextInput from "./inputs/TextInput";
-import FileInput from "./inputs/FileInput";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
@@ -66,46 +65,36 @@ const PreviewFormField = (props: PreviewFormFieldInterface) => {
 
 	return (
 		<div>
-			{field.kind === "TEXT" && (
-				<TextInput
-					field={field}
-					error={getError()}
-					answer={answerField.value}
-					changeValueCB={updateAnswerCB}
-				/>
-			)}
-			{field.kind === "DROPDOWN" && (
-				<DropdownInput
-					field={field}
-					error={getError()}
-					answer={answerField.value}
-					changeValueCB={updateAnswerCB}
-				/>
-			)}
-			{field.kind === "RADIO" && (
-				<RadioInput
-					field={field}
-					error={getError()}
-					answer={answerField.value}
-					changeValueCB={updateAnswerCB}
-				/>
-			)}
-
-			{field.meta === "multiselect" && (
+			{field.meta === "multiselect" ? (
 				<MultiselectInput
 					field={field}
 					error={getError()}
 					answer={answerField.value}
 					changeValueCB={updateAnswerCB}
 				/>
-			)}
-			{field.meta === "file-upload" && (
-				<FileInput
+			) : field.kind === "TEXT" ? (
+				<TextInput
 					field={field}
 					error={getError()}
 					answer={answerField.value}
 					changeValueCB={updateAnswerCB}
 				/>
+			) : field.kind === "DROPDOWN" ? (
+				<DropdownInput
+					field={field}
+					error={getError()}
+					answer={answerField.value}
+					changeValueCB={updateAnswerCB}
+				/>
+			) : field.kind === "RADIO" ? (
+				<RadioInput
+					field={field}
+					error={getError()}
+					answer={answerField.value}
+					changeValueCB={updateAnswerCB}
+				/>
+			) : (
+				<div></div>
 			)}
 		</div>
 	);
@@ -269,25 +258,31 @@ const Preview = (props: { formId: number }) => {
 				</div>
 			</div>
 			<div className="flex flex-col">
-				{preview.submission.answers.map(
-					(field, index) =>
-						preview.activeIndex === index && (
-							<PreviewFormField
-								key={field.form_field}
-								error={preview.errors}
-								answerField={field}
-								formId={props.formId}
-								updateAnswerCB={(fieldId: number, value: string) =>
-									dispatch({
-										type: "update_answer",
-										payload: {
-											fieldId,
-											value,
-										},
-									})
-								}
-							/>
-						),
+				{preview.submission.answers.length > 0 ? (
+					preview.submission.answers.map(
+						(field, index) =>
+							preview.activeIndex === index && (
+								<PreviewFormField
+									key={field.form_field}
+									error={preview.errors}
+									answerField={field}
+									formId={props.formId}
+									updateAnswerCB={(fieldId: number, value: string) =>
+										dispatch({
+											type: "update_answer",
+											payload: {
+												fieldId,
+												value,
+											},
+										})
+									}
+								/>
+							),
+					)
+				) : (
+					<span className="text-center text-lg font-bold">
+						No question to preview
+					</span>
 				)}
 				<div className="flex justify-end w-full gap-2">
 					<Nav

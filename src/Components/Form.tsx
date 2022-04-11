@@ -159,7 +159,6 @@ const AddFields = (props: addFieldChecker) => {
 					<option value="DROPDOWN">Dropdown</option>
 					<option value="RADIO">Radio</option>
 					<option value="multiselect">MultiSelect</option>
-					<option value="file-upload">File Upload</option>
 				</select>
 				{errors.kind && <span className="text-red-500">{errors.kind}</span>}
 				<button
@@ -199,10 +198,8 @@ const Form = (props: { formId: number }) => {
 					type: "update_loading",
 					payload: true,
 				});
-
 				const formData: formDataChecker = await getFormData(props.formId);
 				setForm(formData);
-
 				const formFieldsData: Pagination<fieldChecker> = await getFormFields(
 					props.formId,
 				);
@@ -222,7 +219,6 @@ const Form = (props: { formId: number }) => {
 		fetchFormData();
 	}, [props.formId]);
 
-	// update form title
 	React.useEffect(() => {
 		document.title = `Form - ${form.title}`;
 		titleRef.current?.focus();
@@ -238,13 +234,11 @@ const Form = (props: { formId: number }) => {
 		let timeout = setTimeout(() => {
 			handleFormTitleChange();
 		}, 1000);
-
 		return () => {
 			clearTimeout(timeout);
 		};
 	}, [form.id, form.title, props.formId]);
 
-	// Remove a field from the active form...
 	const handleRemoveField = async (fieldId: number) => {
 		try {
 			await removeField(props.formId, fieldId);
