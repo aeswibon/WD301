@@ -3,34 +3,39 @@ import { fieldChecker } from "../../types/form";
 
 interface MultiselectInputProps {
 	field: fieldChecker;
-	options: string[];
 	error: string;
+	answer: string;
 	changeValueCB: (id: number, value: string) => void;
 }
 
 export default function MultiselectInput(props: MultiselectInputProps) {
-	const { field, options, changeValueCB } = props;
+	const { field, answer, changeValueCB } = props;
 	const [open, setOpen] = React.useState<boolean>(false);
-	const [selected, setSelected] = React.useState<string[]>([]);
+	const [selected, setSelected] = React.useState<string[]>(
+		answer.split(",") || [],
+	);
+	const options = field.options!.split(",");
 
-	// React.useEffect(() => {
-	// 	let timeout = setTimeout(() => {
-	// 		changeValueCB(field.id!, options.join(","));
-	// 	}, 1000);
+	React.useEffect(() => {
+		let timeout = setTimeout(() => {
+			changeValueCB(field.id!, selected.join(","));
+		}, 1000);
 
-	// 	return () => clearTimeout(timeout);
-	// }, [multiAnswers]);
+		return () => clearTimeout(timeout);
+	}, [changeValueCB, field.id, options, selected]);
 
-	// const handleChange = (
-	// 	e: React.ChangeEvent<HTMLInputElement>,
-	// 	value: string,
-	// ) => {
-	// 	if (e.target.checked) {
-	// 		setMultiAnswers([...multiAnswers, value]);
-	// 	} else {
-	// 		setMultiAnswers(multiAnswers.filter((answer) => answer !== value));
-	// 	}
-	// };
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const item = e.target.value;
+		if (e.target.checked) {
+			setSelected((p) => {
+				return [...p, item];
+			});
+		} else {
+			setSelected((p) => {
+				return [...p.filter((i) => i !== item)];
+			});
+		}
+	};
 
 	return (
 		<div className="flex flex-col">
@@ -60,14 +65,14 @@ export default function MultiselectInput(props: MultiselectInputProps) {
 						/>
 						<label>Select all</label>
 					</div>
-					{question?.options.map((option, index) => {
+					{options.map((option, index) => {
 						return (
 							<div
 								key={index}
 								className="flex gap-2 items-center hover:text-white hover:bg-blue-500 hover:cursor-pointer">
 								<input
 									type="checkbox"
-									id={question?.id}
+									id={`${index}`}
 									name={option}
 									value={option}
 									onChange={handleChange}
@@ -80,35 +85,6 @@ export default function MultiselectInput(props: MultiselectInputProps) {
 					})}
 				</div>
 			)}
-			<div className="bg-white rounded-lg px-4 py-2 mt-2">
-				{openOptions && (
-					<div className="h-24 overflow-y-scroll">
-						{field.options!.split(",").map((option, index) => (
-							<div className="flex gap-2 items-center" key={index}>
-								<input
-									type="checkbox"
-									id={`${index}`}
-									checked={
-										multiAnswers.find((answer) => answer === option) ? true : false
-									}
-									onChange={(e) => handleChange(e, option)}
-								/>
-								<label htmlFor={`${index}`}>{option}</label>
-							</div>
-						))}
-					</div>
-				)}
-			</div>
-			<div className="flex flex-row flex-wrap gap-x-2 items-center mt-4">
-				{multiAnswers.map(
-					(answer, index) =>
-						answer.length > 0 && (
-							<span key={index} className="bg-white rounded-lg px-3 py-1 text-sm">
-								{answer}
-							</span>
-						),
-				)}
-			</div>
 			{props.error && <span className="text-sm text-red-600">{props.error}</span>}
 		</div>
 	);

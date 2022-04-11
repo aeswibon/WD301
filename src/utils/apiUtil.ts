@@ -6,22 +6,16 @@ type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 export const request = async (
 	endpoint: string,
 	method: RequestMethod = "GET",
-	data: any = {},
+	data: any = null,
 ) => {
-	let url, body;
-	if (method === "GET") {
-		const requestParams = data
+	const url = `${API_BASE_URL}${endpoint}${
+		method === "GET" && data
 			? `?${Object.keys(data)
 					.map((key) => `${key}=${data[key]}`)
 					.join("&")}`
-			: "";
-		url = `${API_BASE_URL}${endpoint}${requestParams}`;
-		body = null;
-	} else {
-		url = `${API_BASE_URL}${endpoint}`;
-		body = data ? JSON.stringify(data) : null;
-	}
-
+			: ""
+	}`;
+	const body = method !== "GET" && data ? JSON.stringify(data) : null;
 	const token = localStorage.getItem("token");
 	const auth = token ? `Token ${localStorage.getItem("token")}` : "";
 
@@ -35,7 +29,9 @@ export const request = async (
 	});
 
 	if (response.ok) {
-		if (method === "DELETE") return "true";
+		if (method === "DELETE") {
+			return true;
+		}
 		const json = await response.json();
 		return json;
 	} else {

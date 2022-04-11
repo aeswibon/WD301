@@ -1,38 +1,34 @@
-import React, { useState } from 'react';
-import { Field } from '../../functions/types/formTypes';
+import { fieldChecker } from "../../types/form";
 
-interface RatingInputProps {
-    field: Field;
-    answer: string;
-    changeValueCB: (id: number, value: string) => void;
+interface FileInputProps {
+	field: fieldChecker;
+	error: string;
+	answer: string;
+	changeValueCB: (id: number, value: string) => void;
 }
-export default function RatingInput(props: RatingInputProps) {
-    const { field, answer, changeValueCB } = props;
-    
-    const [hover, setHover] = useState(0);
-    const [rating, setRating] = useState(Number(answer) | 0);
+const FileInput = (props: FileInputProps) => {
+	const { field, answer, changeValueCB } = props;
 
-    const handleRatingChange = (newRating: number) => {
-        setRating(newRating);
-        changeValueCB(field.id!, String(newRating));
-    }
+	const handleInput = (file: FileList | null) => {
+		if (file) {
+			const name: string | undefined = file.item(0)?.name;
+			changeValueCB(field.id!, name ? name : "file");
+		}
+	};
 
-    return (
-        <div className="inline-block">
-            <p className="text-xl text-gray-800 font-semibold">{ field.label }</p>
-            {[...Array(Number(field.options))].map((star, i) => (
-                <button 
-                    key={i}
-                    type="button" 
-                    className={`p-1 bg-transparent border-0 outline-0 cursor-pointer ${i + 1 <= (hover || rating) ? "text-red-600" : "text-gray-400"}`}
-                    onClick={() => handleRatingChange(i + 1)}
-                    onMouseEnter={() => setHover(i + 1)}
-                    onMouseLeave={() => setHover(rating)}
-                >
-                    <span className="text-4xl">&#9733;</span>
-                </button>
-            ))}
-            
-        </div>
-    );
-}
+	return (
+		<div className="flex flex-col">
+			<label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
+				{props.field.label}
+			</label>
+			<span>{answer}</span>
+			<input
+				type="file"
+				accept=".jpg"
+				onChange={(e) => handleInput(e.target.files)}
+			/>
+			{props.error && <p className="text-sm text-red-600">{props.error}</p>}
+		</div>
+	);
+};
+export default FileInput;

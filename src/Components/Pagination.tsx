@@ -17,8 +17,8 @@ const PaginationContainer = (props: PaginatorProps) => {
 				<div>
 					<p className="text-sm text-gray-700">
 						Showing <span className="font-medium">{activePage}</span> to
-						<span className="font-medium">{Math.ceil(count / limit)}</span> of
-						<span className="font-medium">{count}</span> results
+						<span className="font-medium"> {Math.ceil(count / limit)}</span> of
+						<span className="font-medium"> {count}</span> results
 					</p>
 				</div>
 				<div>

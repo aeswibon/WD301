@@ -19,6 +19,7 @@ const Login = () => {
 			const data = await login(username, password);
 			localStorage.setItem("token", data.token);
 			navigate("/");
+			window.location.reload();
 		} catch (error) {
 			console.log(error);
 		}

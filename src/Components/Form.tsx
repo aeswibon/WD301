@@ -61,8 +61,6 @@ const Label = (props: labelChecker) => {
 					fieldData.meta === "multiselect") && (
 					<input
 						type="text"
-						name="options"
-						title="Options separated by comma(,)"
 						value={fieldData.options}
 						placeholder="Options separated by ,(comma)"
 						onChange={(e) => setFieldData({ ...fieldData, options: e.target.value })}
@@ -94,10 +92,7 @@ const AddFields = (props: addFieldChecker) => {
 		options: "",
 	});
 
-	const handleInputKindChange = (
-		event: React.ChangeEvent<HTMLSelectElement>,
-	) => {
-		const kind = event.target.value;
+	const handleChange = (kind: string) => {
 		if (kind === "RADIO" || kind === "DROPDOWN" || kind === "TEXT") {
 			setNewField({
 				...newField,
@@ -111,6 +106,7 @@ const AddFields = (props: addFieldChecker) => {
 				kind: "NULL",
 			});
 		}
+		console.log(newField);
 	};
 
 	// Add a new field
@@ -121,10 +117,11 @@ const AddFields = (props: addFieldChecker) => {
 		if (Object.keys(validationError).length === 0) {
 			try {
 				props.setLoadingCB(true);
-				let newFieldData = newField;
+				const newFieldData = newField;
 				if (newField.kind === "NULL") {
 					newFieldData.kind = "TEXT";
 				}
+				console.log(newFieldData);
 				const data: fieldChecker = await addField(props.formId, newFieldData);
 				props.setFormFieldsCB(data);
 				setNewField({
@@ -152,11 +149,9 @@ const AddFields = (props: addFieldChecker) => {
 				/>
 				{errors.label && <span className="text-red-500">{errors.label}</span>}
 				<select
-					id="input_kind"
-					title="Field Type"
 					value={newField.meta ? newField.meta : newField.kind}
 					className="border-2 rounded-lg bg-gray-200 py-2 px-4 my-2"
-					onChange={handleInputKindChange}>
+					onChange={(e) => handleChange(e.target.value)}>
 					<option disabled value="">
 						Select input kind
 					</option>

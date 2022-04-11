@@ -10,7 +10,7 @@ import PreviewForm from "./PreviewForm";
 const routes = {
 	"/": () => <ListForms />,
 	"/login": () => <Login />,
-	"/form/:formId": ({ formId }: { formId: string }) => (
+	"/forms/:formId": ({ formId }: { formId: string }) => (
 		<Form formId={Number(formId)} />
 	),
 	"/preview/:formId": ({ formId }: { formId: string }) => (

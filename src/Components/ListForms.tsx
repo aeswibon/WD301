@@ -8,6 +8,7 @@ import { listForms } from "../utils/apiUtil";
 import Loading from "./Loading";
 import PaginationContainer from "./Pagination";
 import AddForm from "./AddForm";
+import Modal from "./Modal";
 
 const fetchFormsData = async (
 	setForms: React.Dispatch<
@@ -28,6 +29,7 @@ const fetchFormsData = async (
 			limit: limitValue,
 		});
 
+		data.results.filter((form: formDataChecker) => form.is_public === true);
 		setForms({
 			count: data.count,
 			prev: data.prev,
@@ -45,8 +47,9 @@ const fetchFormsData = async (
 	}
 };
 
-const ListForms = (): JSX.Element => {
-	const [loading, setLoading] = React.useState(false);
+const ListForms = () => {
+	const [loading, setLoading] = React.useState<boolean>(false);
+	const [openForm, setOpenForm] = React.useState<boolean>(false);
 	const [forms, setForms] = React.useState<PaginationData<formDataChecker>>({
 		count: 0,
 		prev: null,
@@ -83,6 +86,12 @@ const ListForms = (): JSX.Element => {
 			const updatedForms = forms.results.filter(
 				(form: formDataChecker) => form.id !== id,
 			);
+			forms.results.map((form: formDataChecker) => {
+				if (form.id === id) {
+					form.is_public = false;
+				}
+				return form;
+			});
 			setForms({
 				...forms,
 				results: updatedForms,
@@ -143,9 +152,16 @@ const ListForms = (): JSX.Element => {
 				activePage={forms.activePage}
 				onPageChangeCB={onPageChange}
 			/>
-			<div className="my-4">
-				<AddForm />
-				Add a form
+			<div className="flex justify-center">
+				<button
+					type="button"
+					onClick={(_) => setOpenForm(true)}
+					className="max-w-[300px] w-full text-center px-6 py-[6px] rounded-lg bg-blue-600 text-white font-semibold text-lg mt-4">
+					Add a form
+				</button>
+				<Modal isOpen={openForm} closeCB={() => setOpenForm(false)}>
+					<AddForm />
+				</Modal>
 			</div>
 		</>
 	);

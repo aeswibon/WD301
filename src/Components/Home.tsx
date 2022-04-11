@@ -5,6 +5,7 @@ import { User } from "../types/form";
 const Home = (props: { user: User }): JSX.Element => {
 	return (
 		<>
+			{console.log(props.user.username)}
 			<div className="flex gap-2 justify-between items-center ">
 				<img
 					className="h-16 w-16 animate-spin"
@@ -32,7 +33,7 @@ const Home = (props: { user: User }): JSX.Element => {
 								key={link.url}
 								href={link.url}
 								className="text-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
-								exactActiveClass="text-blue-600 border-b-2 bg-white border-blue-700">
+								exactActiveClass="text-blue-600 bg-black/[0.1] border-2 border-blue-700">
 								{link.page}
 							</ActiveLink>
 						) : (
@@ -40,7 +41,7 @@ const Home = (props: { user: User }): JSX.Element => {
 								type="button"
 								key={link.page}
 								onClick={link.onClick}
-								className="text-white bg-blue-600 p-2 m-2 uppercase font-semibold">
+								className="text-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold">
 								{link.page}
 							</button>
 						),

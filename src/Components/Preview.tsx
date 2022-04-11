@@ -21,12 +21,14 @@ import { Answer, fieldChecker, formDataChecker, User } from "../types/form";
 import DropdownInput from "./inputs/DropdownInput";
 import RadioInput from "./inputs/RadioInput";
 import MultiselectInput from "./inputs/MultiselectInput";
+import TextInput from "./inputs/TextInput";
+import FileInput from "./inputs/FileInput";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 interface PreviewFormFieldInterface {
-	total: number;
 	error: Error<Answer>[];
 	formId: number;
-	activeIndex: number;
 	answerField: Answer;
 	updateAnswerCB: (fieldId: number, value: string) => void;
 }
@@ -44,9 +46,8 @@ const fetchFormField = async (
 	}
 };
 
-export default function PreviewFormField(props: PreviewFormFieldInterface) {
-	const { formId, total, error, activeIndex, answerField, updateAnswerCB } =
-		props;
+const PreviewFormField = (props: PreviewFormFieldInterface) => {
+	const { formId, error, answerField, updateAnswerCB } = props;
 	const [field, setField] = React.useState<fieldChecker>({
 		label: "",
 		kind: "NULL",
@@ -65,9 +66,14 @@ export default function PreviewFormField(props: PreviewFormFieldInterface) {
 
 	return (
 		<div>
-			<p className="text-right">
-				Currently on {activeIndex + 1}/{total}
-			</p>
+			{field.kind === "TEXT" && (
+				<TextInput
+					field={field}
+					error={getError()}
+					answer={answerField.value}
+					changeValueCB={updateAnswerCB}
+				/>
+			)}
 			{field.kind === "DROPDOWN" && (
 				<DropdownInput
 					field={field}
@@ -89,22 +95,12 @@ export default function PreviewFormField(props: PreviewFormFieldInterface) {
 				<MultiselectInput
 					field={field}
 					error={getError()}
-					options={answerField.value}
-					changeValueCB={updateAnswerCB}
-				/>
-			)}
-
-			{field.meta === "textarea" && (
-				<TextareaInput
-					field={field}
-					error={getError()}
 					answer={answerField.value}
 					changeValueCB={updateAnswerCB}
 				/>
 			)}
-
-			{field.meta === "rating" && (
-				<RatingInput
+			{field.meta === "file-upload" && (
+				<FileInput
 					field={field}
 					error={getError()}
 					answer={answerField.value}
@@ -113,7 +109,64 @@ export default function PreviewFormField(props: PreviewFormFieldInterface) {
 			)}
 		</div>
 	);
+};
+
+interface NavProps {
+	activeIndex: number;
+	total: number;
+	updateActiveIndexCB: (index: number) => void;
 }
+
+const Nav = (props: NavProps) => {
+	const { activeIndex, total, updateActiveIndexCB } = props;
+
+	const nextField = () => {
+		let currentIndex = activeIndex;
+		currentIndex = currentIndex >= total - 2 ? total - 1 : currentIndex + 1;
+		updateActiveIndexCB(currentIndex);
+	};
+
+	const previousField = () => {
+		let currentIndex = activeIndex;
+		currentIndex = currentIndex <= 1 ? 0 : currentIndex - 1;
+		updateActiveIndexCB(currentIndex);
+	};
+
+	const nextButton = () => {
+		if (activeIndex < total - 1) {
+			return (
+				<button
+					type="button"
+					className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded"
+					onClick={nextField}>
+					Next <FontAwesomeIcon icon={faArrowRight} />
+				</button>
+			);
+		}
+		return null;
+	};
+
+	const previousButton = () => {
+		if (activeIndex > 0) {
+			return (
+				<button
+					type="button"
+					className="bg-blue-500 text-white font-bold py-2 px-4 my-4 rounded"
+					onClick={previousField}>
+					<FontAwesomeIcon icon={faArrowLeft} /> Previous
+				</button>
+			);
+		}
+		return null;
+	};
+
+	return (
+		<>
+			{previousButton()}
+			{nextButton()}
+		</>
+	);
+};
 
 const initialPreviewState: PreviewState = {
 	loading: false,
@@ -176,8 +229,7 @@ const Preview = (props: { formId: number }) => {
 		initializePreviewState(props.formId, dispatch);
 	}, [props.formId]);
 
-	const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const handleSubmit = async () => {
 		const errors = validatePreviewForm(preview.submission.answers);
 		dispatch({
 			type: "update_error",
@@ -204,15 +256,19 @@ const Preview = (props: { formId: number }) => {
 	};
 
 	return (
-		<div>
+		<>
 			{preview.loading && <Loading />}
-			<div className="py-2 w-full flex flex-col items-center">
-				<h2 className="text-xl font-semibold">{preview.submission.form?.title}</h2>
-				<p>This form contains {preview.submission.answers.length} questions</p>
+			<div className="flex flex-col">
+				<div className="flex my-3 justify-between">
+					<h2 className="text-3xl font-semibold">
+						{preview.submission.form?.title}
+					</h2>
+					<span>
+						Question {preview.activeIndex + 1}/{preview.submission.answers.length}
+					</span>
+				</div>
 			</div>
-			<form
-				onSubmit={handleSubmit}
-				className="max-w-[400px] w-full mx-auto rounded-lg shadow-lg bg-gray-100 p-5 my-3">
+			<div className="flex flex-col">
 				{preview.submission.answers.map(
 					(field, index) =>
 						preview.activeIndex === index && (
@@ -221,8 +277,6 @@ const Preview = (props: { formId: number }) => {
 								error={preview.errors}
 								answerField={field}
 								formId={props.formId}
-								activeIndex={preview.activeIndex}
-								total={preview.submission.answers.length}
 								updateAnswerCB={(fieldId: number, value: string) =>
 									dispatch({
 										type: "update_answer",
@@ -235,32 +289,32 @@ const Preview = (props: { formId: number }) => {
 							/>
 						),
 				)}
+				<div className="flex justify-end w-full gap-2">
+					<Nav
+						activeIndex={preview.activeIndex}
+						total={preview.submission.answers.length}
+						updateActiveIndexCB={(index: number) =>
+							dispatch({
+								type: "update_active_index",
+								payload: index,
+							})
+						}
+					/>
+					{preview.activeIndex === preview.submission.answers.length - 1 && (
+						<button
+							onClick={handleSubmit}
+							className="bg-rose-500 text-white font-bold py-2 px-4 my-4 rounded">
+							Submit
+						</button>
+					)}
+				</div>
+			</div>
 
-				<BackAndForthNav
-					activeIndex={preview.activeIndex}
-					total={preview.submission.answers.length}
-					updateActiveIndexCB={(index: number) =>
-						dispatch({
-							type: "update_active_index",
-							payload: index,
-						})
-					}
-				/>
-
-				{preview.activeIndex === preview.submission.answers.length - 1 && (
-					<button
-						type="submit"
-						className="px-6 py-1 bg-gray-400 rounded-lg font-semibold text-lg mt-8 hover:shadow-lg">
-						Submit
-					</button>
-				)}
-			</form>
-
-			<div className="py-4 mt-4 flex justify-center items-center w-full">
+			<div className="flex gap-4 justify-center mt-8">
 				<Link
 					href={`/preview/${props.formId}`}
-					className="px-6 py-1 bg-blue-400 text-white rounded-lg font-semibold text-lg shadow-sm border-2 border-blue-400 mr-2 hover:bg-white hover:text-blue-400">
-					Go Back
+					className="bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold">
+					Close form
 				</Link>
 				<button
 					type="button"
@@ -269,10 +323,12 @@ const Preview = (props: { formId: number }) => {
 							type: "reset_field",
 						});
 					}}
-					className="px-6 py-1 rounded-lg border-blue-400 text-blue-400 border-2 font-semibold ml-2 text-lg shadow-sm hover:bg-blue-400 hover:text-white">
-					Reset Answers
+					className="bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold">
+					Reset Answer
 				</button>
 			</div>
-		</div>
+		</>
 	);
 };
+
+export default Preview;
