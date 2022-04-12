@@ -60,8 +60,12 @@ export const getFormData = (formId: number) => {
 	return request(`forms/${formId}/`, "GET", {});
 };
 
-export const updateFormData = (formId: number, formData: FormData) => {
+export const updateFormData = (formId: number, formData: formDataChecker) => {
 	return request(`forms/${formId}/`, "PUT", formData);
+};
+
+export const deleteFormData = (formId: number, formData: formDataChecker) => {
+	return request(`forms/${formId}/`, "DELETE", formData);
 };
 
 export const updateFormTitle = (formId: number, title: string) => {

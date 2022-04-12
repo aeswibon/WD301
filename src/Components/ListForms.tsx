@@ -4,7 +4,7 @@ import { faEdit, faEye, faTrashAlt } from "@fortawesome/free-regular-svg-icons";
 import { formDataChecker } from "../types/form";
 import { Link, useQueryParams } from "raviger";
 import { Pagination, PaginationData } from "../types/pagination";
-import { listForms } from "../utils/apiUtil";
+import { deleteFormData, listForms } from "../utils/apiUtil";
 import Loading from "./Loading";
 import PaginationContainer from "./Pagination";
 import AddForm from "./AddForm";
@@ -81,21 +81,12 @@ const ListForms = () => {
 	}, [search, forms]);
 
 	// delete the form
-	const handleDelete = (id: Number | undefined) => {
-		if (id) {
-			const updatedForms = forms.results.filter(
-				(form: formDataChecker) => form.id !== id,
-			);
-			forms.results.map((form: formDataChecker) => {
-				if (form.id === id) {
-					form.is_public = false;
-				}
-				return form;
-			});
-			setForms({
-				...forms,
-				results: updatedForms,
-			});
+	const handleDelete = async (form: formDataChecker) => {
+		try {
+			await deleteFormData(form.id!, form);
+			fetchFormsData(setForms, setLoading);
+		} catch (error) {
+			console.log(error);
 		}
 	};
 
@@ -138,7 +129,7 @@ const ListForms = () => {
 								<Link href={`/forms/${form.id}`} className="m-auto">
 									<FontAwesomeIcon icon={faEdit} />
 								</Link>
-								<button onClick={() => handleDelete(form.id)}>
+								<button onClick={(_) => handleDelete(form)}>
 									<FontAwesomeIcon icon={faTrashAlt} />
 								</button>
 							</div>

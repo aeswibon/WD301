@@ -70,20 +70,19 @@ const PaginationContainer = (props: PaginatorProps) => {
 								aria-hidden="true"
 							/>
 						</button>
-						{console.log(paginationRange!)}
-						{paginationRange!.map((page) => {
+						{paginationRange!.map((page, index) => {
 							let name: string = String(page);
 							if (page === -1) {
 								name = "...";
 							}
 							return (
 								<button
-									key={page}
+									key={index}
 									type="button"
 									aria-current="page"
 									onClick={(_) => onPageChangeCB(page + 1)}
 									className={`bg-white border-gray-300 text-gray-500 relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-										activePage === page
+										activePage === page + 1
 											? "z-10 bg-indigo-50 border-indigo-500 text-indigo-600"
 											: "hover:bg-gray-100"
 									}`}>

@@ -159,6 +159,7 @@ const AddFields = (props: addFieldChecker) => {
 					<option value="DROPDOWN">Dropdown</option>
 					<option value="RADIO">Radio</option>
 					<option value="multiselect">MultiSelect</option>
+					<option value="location">Location</option>
 				</select>
 				{errors.kind && <span className="text-red-500">{errors.kind}</span>}
 				<button
