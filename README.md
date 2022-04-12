@@ -2,7 +2,7 @@
 
 ## Levels updates
 
-✅ ❓ Level 7 Done (Review Pending)
+✅ ❓ Level 8 Done (Review Pending)
 
 ## Setting Up the Project
 
