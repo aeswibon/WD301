@@ -149,6 +149,7 @@ const ListForms = () => {
 			<PaginationContainer
 				count={forms.count}
 				limit={forms.limit}
+				siblingCount={1}
 				activePage={forms.activePage}
 				onPageChangeCB={onPageChange}
 			/>
