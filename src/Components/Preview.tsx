@@ -24,6 +24,7 @@ import MultiselectInput from "./inputs/MultiselectInput";
 import TextInput from "./inputs/TextInput";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import LocationPicker from "./inputs/Location";
 
 interface PreviewFormFieldInterface {
 	error: Error<Answer>[];
@@ -67,6 +68,13 @@ const PreviewFormField = (props: PreviewFormFieldInterface) => {
 		<div>
 			{field.meta === "multiselect" ? (
 				<MultiselectInput
+					field={field}
+					error={getError()}
+					answer={answerField.value}
+					changeValueCB={updateAnswerCB}
+				/>
+			) : field.meta === "location" ? (
+				<LocationPicker
 					field={field}
 					error={getError()}
 					answer={answerField.value}

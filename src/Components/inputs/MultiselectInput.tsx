@@ -9,7 +9,7 @@ interface MultiselectInputProps {
 }
 
 export default function MultiselectInput(props: MultiselectInputProps) {
-	const { field, answer, changeValueCB } = props;
+	const { field, error, answer, changeValueCB } = props;
 	const [open, setOpen] = React.useState<boolean>(false);
 	const [selected, setSelected] = React.useState<string[]>(
 		answer.split(",") || [],
@@ -85,7 +85,7 @@ export default function MultiselectInput(props: MultiselectInputProps) {
 					})}
 				</div>
 			)}
-			{props.error && <span className="text-sm text-red-600">{props.error}</span>}
+			{error && <span className="text-sm text-red-600">{error}</span>}
 		</div>
 	);
 }
