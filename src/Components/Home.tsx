@@ -5,7 +5,6 @@ import { User } from "../types/form";
 const Home = (props: { user: User }): JSX.Element => {
 	return (
 		<>
-			{console.log(props.user.username)}
 			<div className="flex gap-2 justify-between items-center ">
 				<img
 					className="h-16 w-16 animate-spin"

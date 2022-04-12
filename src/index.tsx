@@ -5,6 +5,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+
 if (process.env.REACT_APP_SENTRY_DSN) {
 	Sentry.init({
 		dsn: process.env.REACT_APP_SENTRY_DSN,
@@ -19,6 +21,8 @@ ReactDOM.render(
 	</React.StrictMode>,
 	document.getElementById("root"),
 );
+
+serviceWorkerRegistration.unregister();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
