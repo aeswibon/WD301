@@ -3,12 +3,12 @@ import { useRoutes } from "raviger";
 import { User } from "../types/form";
 import Loading from "./Loading";
 import { me } from "../utils/apiUtil";
+import Login from "./Login";
+import Form from "./Form";
+import PreviewForm from "./PreviewForm";
+import Preview from "./Preview";
 const Home = React.lazy(() => import("./Home"));
-const Form = React.lazy(() => import("./Form"));
 const ListForms = React.lazy(() => import("./ListForms"));
-const Login = React.lazy(() => import("./Login"));
-const Preview = React.lazy(() => import("./Preview"));
-const PreviewForm = React.lazy(() => import("./PreviewForm"));
 
 const routes = {
 	"/": () => (
@@ -16,25 +16,15 @@ const routes = {
 			<ListForms />
 		</React.Suspense>
 	),
-	"/login": () => (
-		<React.Suspense fallback={<Loading />}>
-			<Login />
-		</React.Suspense>
-	),
+	"/login": () => <Login />,
 	"/forms/:formId": ({ formId }: { formId: string }) => (
-		<React.Suspense fallback={<Loading />}>
-			<Form formId={Number(formId)} />
-		</React.Suspense>
+		<Form formId={Number(formId)} />
 	),
 	"/preview/:formId": ({ formId }: { formId: string }) => (
-		<React.Suspense fallback={<Loading />}>
-			<PreviewForm formId={Number(formId)} />
-		</React.Suspense>
+		<PreviewForm formId={Number(formId)} />
 	),
 	"/preview/:formId/submission": ({ formId }: { formId: string }) => (
-		<React.Suspense fallback={<Loading />}>
-			<Preview formId={Number(formId)} />
-		</React.Suspense>
+		<Preview formId={Number(formId)} />
 	),
 };
 
